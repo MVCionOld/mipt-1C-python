@@ -38,7 +38,7 @@ class Vector(list):
         return self + other
 
     def __isub__(self, other):
-        self += -other
+        self.__iadd__(-other)
         return self
 
     def __sub__(self, other):
@@ -46,8 +46,6 @@ class Vector(list):
 
     def __rsub__(self, other):
         return -self + other
-
-
 
     def __imul__(self, other):
         if isinstance(other, numbers.Number):
@@ -72,6 +70,37 @@ class Vector(list):
 
     def __rmul__(self, other):
         return self * other
+
+    def __itruediv__(self, other):
+        if isinstance(other, numbers.Number):
+            for i in range(len(self)):
+                self[i] /= other
+            return self
+        elif isinstance(other, Vector):
+            if len(self) != len(other):
+                raise VectorException("Unsuitable sizes of operands.")
+            else:
+                for i in range(len(self)):
+                    self[i] /= other[i]
+                return self
+        else:
+            raise NotImplementedError(f"No div for {type(other)}")
+
+    def __truediv__(self, other):
+        result = copy.copy(self)
+        if isinstance(other, numbers.Number):
+            result /= (Vector(*([1.0]*len(self))) * other)
+        else:
+            result /= other
+        return result
+
+    def __rtruediv__(self, other):
+        if isinstance(other, numbers.Number):
+            result = (Vector(*([1.0]*len(self))) * other)
+        else:
+            result = copy.copy(other)
+        result /= self
+        return result
 
     def __neg__(self):
         return self * (-1)
@@ -111,4 +140,11 @@ if __name__ == '__main__':
     mat = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     a = Vector(1, 2, 3).matrix_mult(mat)
     print(a)
+    a = Vector(3, 1, 4, 1, 5, 9)
+    b = a / a
+    print(b)
+    c = a / 2
+    print(c)
+    d = 3 / a
+    print(d)
 
