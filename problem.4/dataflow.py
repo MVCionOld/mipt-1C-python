@@ -52,6 +52,7 @@ class GeneratorManager:
         for gen_key in self.fact_gens:
             if gen_key == self.fact_gens[gen_key][1]:
                 closed_num += 1
+                self.fact_gens[gen_key][0].close()
                 continue
             elif not(gen_key >= z and self.fact_gens[gen_key][1] < z):
                 continue
