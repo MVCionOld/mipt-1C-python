@@ -1,3 +1,4 @@
+from collections import namedtuple
 from functools import (
     reduce,
     wraps
@@ -31,45 +32,53 @@ def fact_generator(n):
             fact_result *= mult
 
 
+GeneratorUsage = namedtuple('GeneratorUsage', [
+    'gen',
+    'upper_range',
+    'curr_step'
+])
+
+def make_gu(desc: int) -> GeneratorUsage:
+    return GeneratorUsage(
+        gen=fact_generator(desc),
+        upper_range=desc,
+        curr_step=1
+    )	
+
+
 class GeneratorManager:
     
     def __init__(self, *fact_desc):
-        self.fact_gens = dict(zip(
-            fact_desc,
-            list(map(
-                fact_generator, 
-               fact_desc
-            ))
-        ))
-        for gen_key in self.fact_gens:
-            self.fact_gens[gen_key] = (self.fact_gens[gen_key], 1)
+        self.fact_gens = list(map(make_gu, fact_desc))
 
     def __len__(self):
         return len(self.fact_gens)
 
     def send(self, z):
         matched_gen_key, closed_num = -1, 0
-        for gen_key in self.fact_gens:
-            if gen_key == self.fact_gens[gen_key][1]:
+        for i, gu in enumerate(self.fact_gens):
+            if gu.upper_range == gu.curr_step:
                 closed_num += 1
-                self.fact_gens[gen_key][0].close()
+                gu.gen.close()
                 continue
-            elif not(gen_key >= z and self.fact_gens[gen_key][1] < z):
+            elif not(gu.upper_range >= z and gu.curr_step < z):
                 continue
             if matched_gen_key == -1:
-                matched_gen_key = gen_key
-            elif self.fact_gens[matched_gen_key][1] < self.fact_gens[gen_key][1]:
-                matched_gen_key = gen_key
+                matched_gen_key = i
+            elif self.fact_gens[matched_gen_key].curr_step < gu.curr_step:
+                matched_gen_key = i
         if closed_num == len(self):
             print("All generators are closed")
             return None
         elif matched_gen_key == -1:
             print(f"Can't calculate {z}!")
             return None
-        self.fact_gens[matched_gen_key] = (
-                self.fact_gens[matched_gen_key][0], z
+        self.fact_gens[matched_gen_key] = GeneratorUsage(
+            gen=self.fact_gens[matched_gen_key].gen,
+            upper_range=self.fact_gens[matched_gen_key].upper_range,
+            curr_step=z
         )
-        return self.fact_gens[matched_gen_key][0].send(z)
+        return self.fact_gens[matched_gen_key].gen.send(z)
 
 
 if __name__ == '__main__':
@@ -103,6 +112,16 @@ if __name__ == '__main__':
     print(gm.send(6))
     print(gm.send(1))
 
+    print("*"*40)
+
+    gm = GeneratorManager(3, 3, 6)
+    print(gm.send(3))
+    print(gm.send(3))
+    print(gm.send(3))
+    print(gm.send(5))
+    print(gm.send(7))
+    print(gm.send(6))
+    print(gm.send(1))
 
 
 
