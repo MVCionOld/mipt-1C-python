@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+<ol>
+    {% for author_texts in data %}
+    <li><h3><a href={{ author_texts.href }}>{{ author_texts.author }}:</a></h3></li>
+    <ul>
+        {% for text in author_texts.texts %}
+        <li><a href={{ author_texts.href + text.href }}>{{ text.title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</ol>
+</body>
+</html>
